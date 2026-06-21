@@ -3,7 +3,7 @@ from product import Product
 
 class Inventory:
 
-    def connect():
+    def connect(self):
         return sqlite3.connect("inventory.db")
     
     def add_product(self,product):
@@ -11,8 +11,8 @@ class Inventory:
         cursor= conn.cursor()
 
         cursor.execute("""
-        INSERT INTO PRODUCT (name,price, quantity) VALUES (?, ?, ?)
-        """,product.name,product.price,product.quantity)
+        INSERT INTO products (name,price, quantity) VALUES (?, ?, ?)
+        """,(product.name,product.price,product.quantity))
 
         conn.commit()
         conn.close()
