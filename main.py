@@ -10,7 +10,8 @@ while True:
     print("1. Add Product")
     print("2. View Product")
     print("3. Delete Product")
-    print("4. Exit")
+    print("4. Update Product")
+    print("5. Exit")
 
     option = input("Enter Choice: ")
 
@@ -56,8 +57,21 @@ while True:
             print("Product deleted!")
         except ValueError:
             print("Invalid ID. Please enter an integer value.")
-            
-    elif option == "3":
+    elif option == "4":
+        try:
+            product_id = int(input("Enter the Product ID to Update:"))
+            print("What you want to Update")
+            print("1. Name")
+            print("2. Price")
+            print("3. Quantity")
+            choice = int(input("Enter to Choose:"))
+            data = inv.select_option(choice)
+            value = input("Enter the value: ")
+            inv.update_product(product_id,data,value)
+            print("updated !")
+        except ValueError:
+            print("Error")
+    elif option == "5":
         print("Closed!")
         break
 

@@ -34,3 +34,19 @@ class Inventory:
         conn.commit()
         conn.close()
     
+    def update_product(self,product_id,type,value):
+
+        conn = self.connect()
+        cursor = conn.cursor()
+        cursor.execute(f"UPDATE products SET {type} = ? WHERE id = ?",(value,product_id))
+        conn.commit()
+        conn.close()
+
+    def select_option(self,id):
+        if id == 1:
+            value = "name"
+        if id == 2:
+            value = "price"
+        if id == 3:
+            value = "quantity"
+        return value
