@@ -26,3 +26,11 @@ class Inventory:
 
         conn.close()
         return rows
+    
+    def delete_product(self, product_id):
+        conn = self.connect()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM products WHERE id = ?", (product_id,))
+        conn.commit()
+        conn.close()
+    

@@ -4,19 +4,34 @@ from inventory import Inventory
 inv = Inventory()
 
 while True:
+    price = None
+    quantity = None
     print("\n=== INVENTORY SYSTEM ===")
     print("1. Add Product")
     print("2. View Product")
-    print("3. Exit")
+    print("3. Delete Product")
+    print("4. Exit")
 
     option = input("Enter Choice: ")
 
     if option == "1":
         product_name  = input("Enter the Product Name: ")
-        price = float(input("Enter the Price: "))
-        quantity = int(input("Enter the Qty: "))
-        p = Product(product_name,price,quantity)
-        inv.add_product(p)
+        while price is None:
+            try:
+                price = float(input("Enter the Price: "))
+            except ValueError:
+                print("Invalid price. Please enter a numeric/decimal value.")
+
+        while quantity is None:
+            try:
+                quantity = int(input("Enter the Qty: "))
+            except ValueError:
+                print("Invalid quantity. Please enter an integer value.")
+        
+        product = Product(product_name,price,quantity)
+
+        print(product)
+        inv.add_product(product)
         print("Product added!")
     
     elif option == "2":
@@ -35,8 +50,16 @@ while True:
                 str(row[2])
             )
     elif option == "3":
+        try:
+            product_id = int(input("Enter the Product ID to delete:"))
+            inv.delete_product(product_id)
+            print("Product deleted!")
+        except ValueError:
+            print("Invalid ID. Please enter an integer value.")
+            
+    elif option == "3":
         print("Closed!")
         break
-    
+
     else:
         print("Invalid Choice")
