@@ -1,6 +1,8 @@
 import sqlite3
 from product import Product
+from logger import get_logger
 
+log = get_logger()
 class Inventory:
 
     def connect(self):
@@ -13,6 +15,8 @@ class Inventory:
         cursor.execute("""
         INSERT INTO products (name,price, quantity) VALUES (?, ?, ?)
         """,(product.name,product.price,product.quantity))
+
+        log.info("Product added successfully")
 
         conn.commit()
         conn.close()
