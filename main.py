@@ -1,4 +1,4 @@
-from product import Product
+from model import Product
 from inventory import Inventory
 from schedular import run_task
 

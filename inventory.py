@@ -1,5 +1,5 @@
 import sqlite3
-from product import Product
+from model import Product
 from logger import get_logger
 
 log = get_logger()
