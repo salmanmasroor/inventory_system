@@ -33,8 +33,7 @@ def user_table():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                    ) 
                    """)
-    conn.cursor()
+    conn.commit()
     conn.close()
 
 user_table()
-create_table()
