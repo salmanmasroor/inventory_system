@@ -11,18 +11,45 @@ class Application:
         self.inventory = Inventory()
         self.auth = Authentioncation()
         self.current_user = None
-          
+    
+    def _print_table(self,data):
+        print("ID  | Name         | Price    | Qty")
+        print("-------------------------------------")
+        for row in data:
+            print(
+                str(row[0]).ljust(3), "|",
+                str(row[1]).ljust(12), "|",
+                str(row[2]).ljust(8), "|",
+                str(row[3])
+            )
+    
+    def _print_menu(self,title,options=None):
+        print(f"\n=== {title} ====")
+        if options is not None:
+            for i, option in enumerate(options,1):
+                print(f"{i}. {option}")
+
+    def _get_int(self,prompt):
+        try:
+            return int(input(prompt))
+        except ValueError:
+            print("Enter a Valid Number")
+    
+    def _get_float(self,prompt):
+        try:
+            return float(input(prompt))
+        except ValueError:
+            print("Enter the Valid Number")
+
     def run(self):
         while self.current_user is None:
-            print("====== Welcome =======")
-            print("1. Register")
-            print("2. Login")
-            print("3. Exit")
-            choice = input("Enter your choice: ")
-            if choice == "1":
-                print("===Register Yourself===")
+            
+            self._print_menu("Welcone",["Register","Login","Exit"])
+            option = self._get_int("Enter your choice: ")
+            if option == 1:
+                self._print_menu("Register Yourself")
                 self.auth_menu()
-            elif choice == "2":
+            elif option == "2":
                 print("===Login===")
                 result = self.login_menu()
                 print(result)
