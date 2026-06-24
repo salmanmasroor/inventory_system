@@ -54,7 +54,7 @@ class Application:
         else:
             pass
     
-    def inventory_menu(self,price = None,quantity = None):
+    def inventory_menu(self):
         print("\n=== INVENTORY SYSTEM ===")
         print("1. Add Product")
         print("2. View Product")
@@ -66,6 +66,8 @@ class Application:
         option = input("Enter Choice: ")
 
         if option == "1":
+            price = None
+            quantity = None
             product_name  = input("Enter the Product Name: ")
             while price is None:
                 try:

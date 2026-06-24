@@ -8,52 +8,48 @@ class Inventory:
     def connect(self):
         return sqlite3.connect("inventory.db")
     
-    def add_product(self,product):
+    def _query(self,query,*args):
         conn = self.connect()
         cursor= conn.cursor()
 
-        cursor.execute("""
-        INSERT INTO products (name,price, quantity) VALUES (?, ?, ?)
-        """,(product.name,product.price,product.quantity))
-
-        log.info("Product added successfully")
-
+        cursor.execute(query,*args)
         conn.commit()
+
         conn.close()
     
-    def view_products(self):
+    def _fetch(self,query):
         conn = self.connect()
         cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM products")
+        cursor.execute(query)
         rows = cursor.fetchall()
 
         conn.close()
         return rows
     
+    def add_product(self,product):
+        self._query("INSERT INTO products (name,price, quantity) VALUES (?, ?, ?)",(product.name,product.price,product.quantity))
+        log.info("Product added successfully")
+    
+    def view_products(self):
+        return self._fetch("SELECT * FROM products")
+        
     def update_product(self,product_id,type,value):
-
-        conn = self.connect()
-        cursor = conn.cursor()
-        cursor.execute(f"UPDATE products SET {type} = ? WHERE id = ?",(value,product_id))
-        conn.commit()
-        conn.close()
+        self._query(f"UPDATE products SET {type} = ? WHERE id = ?",(value,product_id))
+        log.info(f"Product {type} Updated successfully")
 
     def select_option(self,id):
         if id == 1:
             value = "name"
-        if id == 2:
+        elif id == 2:
             value = "price"
-        if id == 3:
+        elif id == 3:
             value = "quantity"
         return value
     
     def delete_product(self, product_id):
-        conn = self.connect()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM products WHERE id = ?", (product_id,))
-        conn.commit()
-        conn.close()
+        self._query("DELETE FROM products WHERE id = ?", (product_id,))
+        log.info("Product %s deleted", product_id)
     
     def search_product(self,product_id):
         conn = self.connect()
@@ -68,17 +64,8 @@ class Inventory:
             return rows
         
     def low_stock_products(self):
-        conn = self.connect()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM products WHERE quantity < 5")
-        rows = cursor.fetchall()
-        return rows 
+        self._fetch("SELECT * FROM products WHERE quantity < 5")
+
 
 if __name__ == "__main__":
-    inv = Inventory()
-    data = (inv.search_product("Shoes"))
-
-    for a in data:
-        id , name, price, quantity = a
-        print(id , name ,price, quantity)
-
+    pass
