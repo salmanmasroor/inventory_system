@@ -6,7 +6,7 @@ class Authentioncation:
     def connect(self):
         return sqlite3.connect("inventory.db")
     
-    def add_user(self,user):
+    def register(self,user):
         conn = self.connect()
         cursor = conn.cursor()
         hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
