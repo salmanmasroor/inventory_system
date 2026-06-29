@@ -85,22 +85,36 @@ class Authentioncation:
         print("=" * 55)
         print("                   LOGIN")
         print("-" * 55)
+        user = None
+        while True:
+            email = input("1. Email    : ")
+            password = getpass.getpass("2. Password : ")
 
-        email = input("1. Email    : ")
-        password = getpass.getpass("2. Password : ")
+            print("-" * 55)
 
-        print("-" * 55)
-
-        user = self.login(email, password)
-
-        if user:
-            print("\nLogin Successful!")
-            input("\nPress Enter to continue...")
-            return user
-        else:
-            print("\nInvalid Email or Password!")
-            input("\nPress Enter to try again...")
-            return None
+            is_email_exist = self.email_exists(email)
+            
+            if is_email_exist:
+                user = self.login(email, password)
+                if user:
+                    print("\nLogin Successful!")
+                    input("\nPress Enter to continue...")
+                    return user
+                else:
+                    print("\nInvalid Password!")
+                    response = input("\nPress Enter to try again (else press (n/N) to stop proceess)...")
+                    if response == 'n' or response == 'N':
+                        break
+                    else:
+                        pass
+            else:
+                print("Email Does not Exist")
+                response = input("\nPress Enter to try again (else press (n/N) to stop proceess)...")
+                if response == 'n' or response == 'N':
+                    break
+                else:
+                    pass
+                
 
     def login(self,email,password):
         conn = self.connect()
