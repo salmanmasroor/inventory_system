@@ -27,6 +27,52 @@ class Inventory:
         conn.close()
         return rows
     
+    def dashboard_menu(username="Admin"):
+        print("=" * 45)
+        print("               DASHBOARD")
+        print("=" * 45)
+        print()
+
+        print(f"Logged in as : {username}")
+        print()
+
+        print(f"{'Products':<18}: 253")
+        print(f"{'Categories':<18}: 12")
+        print(f"{'Suppliers':<18}: 18")
+        print(f"{'Customers':<18}: 156")
+        print()
+
+        print(f"{'Stock Value':<18}: $85,200")
+        print(f"{'Low Stock':<18}: 9")
+        #print(f"{\n"Today's Sales\":<18}: $1,240")
+        print()
+
+        print("=" * 45)
+
+        options = [
+            "Products",
+            "Categories",
+            "Suppliers",
+            "Customers",
+            "Purchases",
+            "Sales",
+            "Reports",
+            "AI Assistant",
+            "Settings",
+            "Exit"
+        ]
+
+        for i, option in enumerate(options[:-1], 1):
+            print(f"{i}. {option}")
+
+        print("0. Exit")
+        print("-" * 45)
+
+        try:
+            return int(input("Choose: "))
+        except ValueError:
+            return -1
+        
     def add_product(self,product):
         self._query("INSERT INTO products (name,price, quantity) VALUES (?, ?, ?)",(product.name,product.price,product.quantity))
         log.info("Product added successfully")

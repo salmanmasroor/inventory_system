@@ -12,75 +12,68 @@ class Application:
         self.auth = Authentioncation()
         self.current_user = None
     
-    def _print_table(self,data):
-        print("ID  | Name         | Price    | Qty")
-        print("-------------------------------------")
-        for row in data:
-            print(
-                str(row[0]).ljust(3), "|",
-                str(row[1]).ljust(12), "|",
-                str(row[2]).ljust(8), "|",
-                str(row[3])
-            )
-    
-    def _print_menu(self,title,options=None):
-        print(f"\n=== {title} ====")
-        if options is not None:
-            for i, option in enumerate(options,1):
-                print(f"{i}. {option}")
+    def _welcome_menu(self):
+        print("=" * 50)
+        print("        SMART INVENTORY MANAGEMENT".center(40))
+        print("=" * 50)
+        print()
+        print("Welcome!\n")
 
-    def _get_int(self,prompt):
-        try:
-            return int(input(prompt))
-        except ValueError:
-            print("Enter a Valid Number")
-    
-    def _get_float(self,prompt):
-        try:
-            return float(input(prompt))
-        except ValueError:
-            print("Enter the Valid Number")
+        options = [
+            "Login",
+            "Register",
+            "Exit"
+        ]
 
+        for i, option in enumerate(options, 1):
+            print(f"{i}. {option}")
+
+        print("-" * 42)
+
+        return input("Select an option: ")
+    
+    def clear_screen(self):
+        os.system("cls" if os.name == "nt" else "clear")
+    
     def run(self):
         while self.current_user is None:
+            option = self._welcome_menu()
             
-            self._print_menu("Welcone",["Register","Login","Exit"])
-            option = self._get_int("Enter your choice: ")
-            if option == 1:
-                self._print_menu("Register Yourself")
-                self.auth_menu()
-            elif option == "2":
-                print("===Login===")
-                result = self.login_menu()
-                print(result)
+            if option == "1":
+                self.clear_screen()
+                result = self.auth.login_menu()
                 self.current_user = result
+
                 while self.current_user:
-                    result = self.inventory_menu()
-                    if result is False:
-                        break
-        
-    def auth_menu(self):
-        first_name = input("Enter the First Name: ")
-        last_name = input("Enter the Last Name: ")
-        email = input("Enter the Email: ")
-        password = getpass.getpass("Enter the Password: ")
+                    self.inventory.dashboard_menu()
+            
+            elif option == "2":
+                self.clear_screen()
+                result = self.auth.registration_menu()
 
-        user = User(first_name,last_name,email,password)
-        self.auth.register(user)
-        
-        print("\n Registered Successful!")
-    
-    def login_menu(self):
-        email = input("Enter the Email: ")
-        password = getpass.getpass('Enter the Password: ')
-        user = self.auth.login(email,password)
+                if result:
+                    print("User Successfully Registered")
+            
+            elif option == "3":
+                print("Closed!")
+                break
 
-        if user:
-            print("Login")
-            return user
-        else:
-            pass
-    
+            else:
+                self._welcome_menu()
+
+
+if __name__ == "__main__":
+
+    app = Application()
+    app.run()
+
+
+            
+
+
+
+
+""" 
     def inventory_menu(self):
         print("\n=== INVENTORY SYSTEM ===")
         print("1. Add Product")
@@ -183,12 +176,4 @@ class Application:
         
         else:
             print("Invalid Choice")
-
-
-if __name__ == "__main__":
-
-    app = Application()
-    app.run()
-
-
-            
+""" 
