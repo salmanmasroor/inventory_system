@@ -91,6 +91,8 @@ class InventoryUI:
                 self.add_product()
             elif choice == "2":
                 self.view_product()
+            elif choice == "3":
+                self.search_product()
 
     def add_product(self):
         print()
@@ -126,6 +128,55 @@ class InventoryUI:
             print("No products found.")
             return
 
+        page = 1
+        total_pages = math.ceil(len(products) / page_size)
+    
+        while True:
+            start = (page - 1) * page_size
+            chunk = products[start:start + page_size]
+
+            print("=" * 55)
+            print(f"{'ID':<4} {'Name':<13} {'SKU':<8} {'Price':>8} {'Stock':>8}")
+            print("=" * 55)
+
+            for pid, name, price, quantity, sku in chunk:
+                sku = sku or "-"
+                print(f"{pid:<4} {name:<13} {sku:<8} {price:>8} {quantity:>8}")
+
+            print("=" * 55)
+            print("N = Next Page")
+            print("P = Previous Page")
+            print("0 = Back")
+            print("-" * 55)
+            print(f"Page {page} of {total_pages}")
+
+            choice = input("Choice: ").strip().upper()
+
+            if choice == "N":
+                if page < total_pages:
+                    page += 1
+                else:
+                    print("Already on last page.")
+            elif choice == "P":
+                if page > 1:
+                    page -= 1
+                else:
+                    print("Already on first page.")
+            elif choice == "0":
+                break
+            else:
+                print("Invalid choice.")
+    
+    def search_product(self,page_size=2):
+        product_id = input("Enter the name or id for search: ")
+        try:
+            change = int(product_id)
+        except ValueError:
+            change = product_id
+
+        print(change)
+        products = self.inventory.search_product(change)
+        
         page = 1
         total_pages = math.ceil(len(products) / page_size)
     

@@ -48,6 +48,8 @@ class Inventory:
             value = "price"
         elif id == 3:
             value = "quantity"
+        elif id == 4:
+            value = "sku"
         return value
     
     def delete_product(self, product_id):
