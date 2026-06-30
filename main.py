@@ -1,15 +1,12 @@
-from model import Product, User
-from inventory import Inventory
+from Inventory.inventory_service import Inventory
 from schedular import run_task
-from authentication import Authentioncation
+from Auth.authentication_ui import AuthenticationUI
 import os 
-import getpass
-
 class Application:
 
     def __init__(self):
         self.inventory = Inventory()
-        self.auth = Authentioncation()
+        self.auth = AuthenticationUI()
         self.current_user = None
     
     def _welcome_menu(self):

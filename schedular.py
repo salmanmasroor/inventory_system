@@ -1,6 +1,6 @@
 import time
 import threading
-from inventory import Inventory
+from Inventory.inventory_service import Inventory
 from send_email import alert_email
 def low_stock_scheduler():
     inv = Inventory()
