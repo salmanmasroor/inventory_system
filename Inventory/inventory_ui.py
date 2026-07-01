@@ -2,6 +2,8 @@ try:
     from utils import _get_int, _get_float
     from models.product import Product
     from .inventory_service import Inventory
+    from .category_ui import CategoryUI
+    from .category_service import CategoryService
     import math
 
 except ImportError:
@@ -12,14 +14,30 @@ except ImportError:
     from utils import _get_int, _get_float
     from models.product import Product
     from Inventory.inventory_service import Inventory
+    from Inventory.category_ui import CategoryUI
+    from Inventory.category_service import CategoryService
     import math
 
 class InventoryUI:
 
     def __init__(self, app=None):
         self.inventory = Inventory()
+        self.category_service = CategoryService()
         self.app = app
 
+    def _category_map(self):
+        return {cat_id: name for cat_id, name in self.category_service.view_categories()}
+
+    def _parse_product_row(self, row):
+        pid, name, price, quantity = row[0], row[1], row[2], row[3]
+        sku = row[4] if len(row) > 4 else None
+        category_id = row[5] if len(row) > 5 else None
+        return pid, sku, name, price, quantity, category_id
+
+    def _category_label(self, category_id, category_map):
+        if category_id is None:
+            return "-"
+        return category_map.get(category_id, "-")
 
     def dashboard_menu(self,username="Admin"):
         """
@@ -45,7 +63,8 @@ class InventoryUI:
         W = 50
 
         options = [
-            "Products"
+            "Products",
+            "Categories",
         ]
 
         print("=" * W)
@@ -70,7 +89,9 @@ class InventoryUI:
                 self.app.clear_screen()
             self.product_menu()
         elif result == "2":
-            print("Categories")
+            if self.app is not None:
+                self.app.clear_screen()
+            CategoryUI(self.app).display_menu()
 
         elif result == "0":
             if self.app is not None:
@@ -133,8 +154,24 @@ class InventoryUI:
         print("=" * W)
         print("ADD PRODUCT".center(W))
         print("-" * W)
+        category_list = self.category_service.view_categories()
         product_name = input("Product Name : ")
         sku = input("Sku : ")
+
+        category_id = None
+        if category_list:
+            print("Categories : \n")
+            for i, category in enumerate(category_list, 1):
+                print(f"  {i}. {category[1]}")
+            category_choice = _get_int("Choose a category by number: ", min_value=1)
+            if category_choice > len(category_list):
+                print("Invalid category choice.")
+                input("\nPress any key to continue...")
+                return
+            category_id = category_list[category_choice - 1][0]
+        else:
+            print("No categories available. Add categories first.\n")
+
         quantity = _get_int("Quantity : ")
         price = _get_float("Price : ")
 
@@ -152,7 +189,7 @@ class InventoryUI:
 
             break
 
-        product = Product(product_name,sku,quantity,price)
+        product = Product(product_name, sku, quantity, price, category_id)
         self.inventory.add_product(product)
 
         print("\nProduct added successfully!")
@@ -160,12 +197,13 @@ class InventoryUI:
         input("\nPress any key to continue...")
 
     def view_product(self,page_size=4):
-        products = self.inventory.view_products()  # (id, name, price, quantity, sku)
+        products = self.inventory.view_products()
 
         if not products:
             print("No products found.")
             return
 
+        category_map = self._category_map()
         page = 1
         total_pages = math.ceil(len(products) / page_size)
     
@@ -181,15 +219,17 @@ class InventoryUI:
             start = (page - 1) * page_size
             chunk = products[start:start + page_size]
 
-            print("=" * 55)
-            print(f"{'ID':<4} {'Name':<13} {'SKU':<8} {'Price':>8} {'Stock':>8}")
-            print("=" * 55)
+            print("=" * 70)
+            print(f"{'ID':<4} {'Name':<13} {'SKU':<8} {'Price':>8} {'Stock':>8} {'Category':>12}")
+            print("=" * 70)
 
-            for pid, name, price, quantity, sku in chunk:
+            for row in chunk:
+                pid, sku, name, price, quantity, category_id = self._parse_product_row(row)
                 sku = sku or "-"
-                print(f"{pid:<4} {name:<13} {sku:<8} {price:>8} {quantity:>8}")
+                category = self._category_label(category_id, category_map)
+                print(f"{pid:<4} {name:<13} {sku:<8} {price:>8} {quantity:>8} {category:>12}")
 
-            print("=" * 55)
+            print("=" * 70)
             print("N = Next Page")
             print("P = Previous Page")
             print("0 = Back")
@@ -235,28 +275,31 @@ class InventoryUI:
 
         print(change)
         products = self.inventory.search_product(change)
+        category_map = self._category_map()
         
         page = 1
-        total_pages = math.ceil(len(products) / page_size)
+        total_pages = max(1, math.ceil(len(products) / page_size)) if products else 1
     
         while True:
             start = (page - 1) * page_size
             chunk = products[start:start + page_size]
 
-            print("=" * 55)
-            print(f"{'ID':<4} {'Name':<13} {'SKU':<8} {'Price':>8} {'Stock':>8}")
-            print("=" * 55)
+            print("=" * 70)
+            print(f"{'ID':<4} {'Name':<13} {'SKU':<8} {'Price':>8} {'Stock':>8} {'Category':>12}")
+            print("=" * 70)
 
             if len(chunk) == 0:
                 print()
                 print("No Products Found".center(50))
                 print()
             else:
-                for pid, name, price, quantity, sku in chunk:
+                for row in chunk:
+                    pid, sku, name, price, quantity, category_id = self._parse_product_row(row)
                     sku = sku or "-"
-                    print(f"{pid:<4} {name:<13} {sku:<8} {price:>8} {quantity:>8}")
+                    category = self._category_label(category_id, category_map)
+                    print(f"{pid:<4} {name:<13} {sku:<8} {price:>8} {quantity:>8} {category:>12}")
 
-            print("=" * 55)
+            print("=" * 70)
             print("N = Next Page")
             print("P = Previous Page")
             print("0 = Back")

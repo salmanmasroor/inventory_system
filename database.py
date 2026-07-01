@@ -55,6 +55,25 @@ def add_column(table_name, column_name, attributes):
     finally:
         conn.close()
 
+def category_table():
+    conn = connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE
+        )
+    """)
+
+    cursor.execute("PRAGMA table_info(products)")
+    columns = [row[1] for row in cursor.fetchall()]
+    if "category_id" not in columns:
+        cursor.execute("ALTER TABLE products ADD COLUMN category_id INTEGER REFERENCES categories(id)")
+
+    conn.commit()
+    conn.close()
 
 create_table()
 user_table()
+category_table()

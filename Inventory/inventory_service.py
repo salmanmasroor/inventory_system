@@ -3,6 +3,7 @@ from models.product import Product
 from logger import get_logger
 from database import DB_PATH
 
+
 log = get_logger()
 
 
@@ -31,7 +32,7 @@ class Inventory:
         return rows
 
     def add_product(self,product):
-        self._query("INSERT INTO products (name,price, quantity,sku) VALUES (?, ?, ?, ?)",(product.name,product.price,product.quantity,product.sku))
+        self._query("INSERT INTO products (name,price, quantity,sku,category_id) VALUES (?, ?, ?, ?, ?)",(product.name,product.price,product.quantity,product.sku,product.category_id))
         log.info("Product added successfully")
     
     def view_products(self,id=None):
