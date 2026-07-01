@@ -74,6 +74,27 @@ def category_table():
     conn.commit()
     conn.close()
 
+
+def supplier_table():
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS suppliers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            contact TEXT
+        )
+    """)
+
+    cursor.execute("PRAGMA table_info(products)")
+    columns = [row[1] for row in cursor.fetchall()]
+    if "supplier_id" not in columns:
+        cursor.execute("ALTER TABLE products ADD COLUMN supplier_id INTEGER REFERENCES suppliers(id)")
+    conn.commit()
+    conn.close()
+
+
 create_table()
 user_table()
 category_table()
+supplier_table()

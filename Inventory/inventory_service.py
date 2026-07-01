@@ -31,8 +31,19 @@ class Inventory:
         conn.close()
         return rows
 
-    def add_product(self,product):
-        self._query("INSERT INTO products (name,price, quantity,sku,category_id) VALUES (?, ?, ?, ?, ?)",(product.name,product.price,product.quantity,product.sku,product.category_id))
+    def add_product(self, product):
+        self._query(
+            "INSERT INTO products (name, price, quantity, sku, category_id, supplier_id) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                product.name,
+                product.price,
+                product.quantity,
+                product.sku,
+                product.category_id,
+                product.supplier_id,
+            ),
+        )
         log.info("Product added successfully")
     
     def view_products(self,id=None):

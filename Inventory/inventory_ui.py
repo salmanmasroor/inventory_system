@@ -4,6 +4,8 @@ try:
     from .inventory_service import Inventory
     from .category_ui import CategoryUI
     from .category_service import CategoryService
+    from .supplier_ui import SupplierUI
+    from .supplier_service import SupplierService
     import math
 
 except ImportError:
@@ -16,6 +18,8 @@ except ImportError:
     from Inventory.inventory_service import Inventory
     from Inventory.category_ui import CategoryUI
     from Inventory.category_service import CategoryService
+    from Inventory.supplier_ui import SupplierUI
+    from Inventory.supplier_service import SupplierService
     import math
 
 class InventoryUI:
@@ -23,21 +27,31 @@ class InventoryUI:
     def __init__(self, app=None):
         self.inventory = Inventory()
         self.category_service = CategoryService()
+        self.supplier_service = SupplierService()
         self.app = app
 
     def _category_map(self):
         return {cat_id: name for cat_id, name in self.category_service.view_categories()}
 
+    def _supplier_map(self):
+        return {supplier.id: supplier.name for supplier in self.supplier_service.list_suppliers()}
+
     def _parse_product_row(self, row):
         pid, name, price, quantity = row[0], row[1], row[2], row[3]
         sku = row[4] if len(row) > 4 else None
         category_id = row[5] if len(row) > 5 else None
-        return pid, sku, name, price, quantity, category_id
+        supplier_id = row[6] if len(row) > 6 else None
+        return pid, sku, name, price, quantity, category_id, supplier_id
 
     def _category_label(self, category_id, category_map):
         if category_id is None:
             return "-"
         return category_map.get(category_id, "-")
+
+    def _supplier_label(self, supplier_id, supplier_map):
+        if supplier_id is None:
+            return "-"
+        return supplier_map.get(supplier_id, "-")
 
     def dashboard_menu(self,username="Admin"):
         """
@@ -65,6 +79,7 @@ class InventoryUI:
         options = [
             "Products",
             "Categories",
+            "Suppliers",
         ]
 
         print("=" * W)
@@ -92,6 +107,11 @@ class InventoryUI:
             if self.app is not None:
                 self.app.clear_screen()
             CategoryUI(self.app).display_menu()
+
+        elif result == "3":
+            if self.app is not None:
+                self.app.clear_screen()
+            SupplierUI(self.app).display_menu()
 
         elif result == "0":
             if self.app is not None:
@@ -172,6 +192,23 @@ class InventoryUI:
         else:
             print("No categories available. Add categories first.\n")
 
+        supplier_list = self.supplier_service.list_suppliers()
+        supplier_id = None
+        if supplier_list:
+            print("Suppliers : \n")
+            for i, supplier in enumerate(supplier_list, 1):
+                contact = supplier.contact or "-"
+                print(f"  {i}. {supplier.name} ({contact})")
+            supplier_choice = _get_int("Choose a supplier by number (0 to skip): ", min_value=0)
+            if supplier_choice > len(supplier_list):
+                print("Invalid supplier choice.")
+                input("\nPress any key to continue...")
+                return
+            if supplier_choice > 0:
+                supplier_id = supplier_list[supplier_choice - 1].id
+        else:
+            print("No suppliers available. You can add suppliers from the main menu.\n")
+
         quantity = _get_int("Quantity : ")
         price = _get_float("Price : ")
 
@@ -189,7 +226,7 @@ class InventoryUI:
 
             break
 
-        product = Product(product_name, sku, quantity, price, category_id)
+        product = Product(product_name, sku, quantity, price, category_id, supplier_id)
         self.inventory.add_product(product)
 
         print("\nProduct added successfully!")
@@ -204,6 +241,7 @@ class InventoryUI:
             return
 
         category_map = self._category_map()
+        supplier_map = self._supplier_map()
         page = 1
         total_pages = math.ceil(len(products) / page_size)
     
@@ -219,17 +257,24 @@ class InventoryUI:
             start = (page - 1) * page_size
             chunk = products[start:start + page_size]
 
-            print("=" * 70)
-            print(f"{'ID':<4} {'Name':<13} {'SKU':<8} {'Price':>8} {'Stock':>8} {'Category':>12}")
-            print("=" * 70)
+            print("=" * 85)
+            print(
+                f"{'ID':<4} {'Name':<13} {'SKU':<8} {'Price':>8} "
+                f"{'Stock':>8} {'Category':>12} {'Supplier':>12}"
+            )
+            print("=" * 85)
 
             for row in chunk:
-                pid, sku, name, price, quantity, category_id = self._parse_product_row(row)
+                pid, sku, name, price, quantity, category_id, supplier_id = self._parse_product_row(row)
                 sku = sku or "-"
                 category = self._category_label(category_id, category_map)
-                print(f"{pid:<4} {name:<13} {sku:<8} {price:>8} {quantity:>8} {category:>12}")
+                supplier = self._supplier_label(supplier_id, supplier_map)
+                print(
+                    f"{pid:<4} {name:<13} {sku:<8} {price:>8} {quantity:>8} "
+                    f"{category:>12} {supplier:>12}"
+                )
 
-            print("=" * 70)
+            print("=" * 85)
             print("N = Next Page")
             print("P = Previous Page")
             print("0 = Back")
@@ -276,6 +321,7 @@ class InventoryUI:
         print(change)
         products = self.inventory.search_product(change)
         category_map = self._category_map()
+        supplier_map = self._supplier_map()
         
         page = 1
         total_pages = max(1, math.ceil(len(products) / page_size)) if products else 1
@@ -284,9 +330,12 @@ class InventoryUI:
             start = (page - 1) * page_size
             chunk = products[start:start + page_size]
 
-            print("=" * 70)
-            print(f"{'ID':<4} {'Name':<13} {'SKU':<8} {'Price':>8} {'Stock':>8} {'Category':>12}")
-            print("=" * 70)
+            print("=" * 85)
+            print(
+                f"{'ID':<4} {'Name':<13} {'SKU':<8} {'Price':>8} "
+                f"{'Stock':>8} {'Category':>12} {'Supplier':>12}"
+            )
+            print("=" * 85)
 
             if len(chunk) == 0:
                 print()
@@ -294,12 +343,16 @@ class InventoryUI:
                 print()
             else:
                 for row in chunk:
-                    pid, sku, name, price, quantity, category_id = self._parse_product_row(row)
+                    pid, sku, name, price, quantity, category_id, supplier_id = self._parse_product_row(row)
                     sku = sku or "-"
                     category = self._category_label(category_id, category_map)
-                    print(f"{pid:<4} {name:<13} {sku:<8} {price:>8} {quantity:>8} {category:>12}")
+                    supplier = self._supplier_label(supplier_id, supplier_map)
+                    print(
+                        f"{pid:<4} {name:<13} {sku:<8} {price:>8} {quantity:>8} "
+                        f"{category:>12} {supplier:>12}"
+                    )
 
-            print("=" * 70)
+            print("=" * 85)
             print("N = Next Page")
             print("P = Previous Page")
             print("0 = Back")
