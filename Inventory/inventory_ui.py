@@ -1,7 +1,7 @@
 try:
-    from utils import _get_int
+    from utils import _get_int, _get_float
     from models.product import Product
-    from inventory_service import Inventory
+    from .inventory_service import Inventory
     import math
 
 except ImportError:
@@ -11,13 +11,14 @@ except ImportError:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     from utils import _get_int, _get_float
     from models.product import Product
-    from inventory_service import Inventory
+    from Inventory.inventory_service import Inventory
     import math
 
 class InventoryUI:
 
-    def __init__(self):
+    def __init__(self, app=None):
         self.inventory = Inventory()
+        self.app = app
 
 
     def dashboard_menu(self,username="Admin"):
@@ -41,62 +42,97 @@ class InventoryUI:
         #print(f"{\n"Today's Sales\":<18}: $1,240")
         print()
         """
-        print("=" * 45)
-   
+        W = 50
+
         options = [
-            "Products",
+            "Products"
         ]
 
+        print("=" * W)
+        print("SMART INVENTORY MANAGEMENT".center(W))
+        print("=" * W)
+        print("MAIN MENU".center(W))
+        print("-" * W)
+
         for i, option in enumerate(options, 1):
-            print(f"{i}. {option}")
+            print(f"  {i}. {option}")
 
-        print("0. Exit")
-        print("-" * 45)
-
-        return input("Choose: ")
+        print("-" * W)
+        print("  0. Exit")
+        print("=" * W)
+        
+        return input("  Choose: ")
     
     def run(self):
         result = self.dashboard_menu()
-
         if result == "1":
+            if self.app is not None:
+                self.app.clear_screen()
             self.product_menu()
-
         elif result == "2":
             print("Categories")
 
         elif result == "0":
-            print("Exit")
+            if self.app is not None:
+                self.app.clear_screen()
+                self.app.current_user = None
     
-    def product_menu(self):
-        while True:
-            print("=" * 50)
-            print("Products".center(45))
-            print("=" * 50)
-            print()
-            options = [
-                "Add Products",
-                "View Product",
-                "Search Product",
-                "Update Product",
-                "Delete Product",
-                "Exit"
-            ]
 
-            for i, value in enumerate(options,1):
-                print(f"{i}.", value)
-            
-            choice = input("Choice: ")
+
+    def product_menu(self):
+        options = [
+            "Add Product",
+            "View Products",
+            "Search Product",
+            "Update Product",
+            "Delete Product",
+        ]
+
+        while True:
+            self.app.clear_screen()
+            W = 50
+            print("=" * W)
+            print("SMART INVENTORY MANAGEMENT".center(W))
+            print("=" * W)
+            print("PRODUCTS".center(W))
+            print("-" * W)
+
+            for i, option in enumerate(options, 1):
+                print(f"  {i}. {option}")
+
+            print("-" * W)
+            print("  0. Back")
+            print("=" * W)
+
+            choice = input("  Choose: ").strip()
 
             if choice == "1":
+                self.app.clear_screen()
                 self.add_product()
             elif choice == "2":
+                self.app.clear_screen()
                 self.view_product()
             elif choice == "3":
+                self.app.clear_screen()
                 self.search_product()
+            elif choice == "4":
+                self.app.clear_screen()
+                self.update_product()
+            elif choice == "5":
+                self.app.clear_screen()
+                self.delete_product()
+            elif choice == "0":
+                break
+            else:
+                print("\n  Invalid choice. Try again.\n")
 
     def add_product(self):
-        print()
-        print("-"*30)
+        W = 50
+        print("=" * W)
+        print("SMART INVENTORY MANAGEMENT".center(W))
+        print("=" * W)
+        print("ADD PRODUCT".center(W))
+        print("-" * W)
         product_name = input("Product Name : ")
         sku = input("Sku : ")
         quantity = _get_int("Quantity : ")
@@ -121,6 +157,8 @@ class InventoryUI:
 
         print("\nProduct added successfully!")
 
+        input("\nPress any key to continue...")
+
     def view_product(self,page_size=4):
         products = self.inventory.view_products()  # (id, name, price, quantity, sku)
 
@@ -132,6 +170,14 @@ class InventoryUI:
         total_pages = math.ceil(len(products) / page_size)
     
         while True:
+            self.app.clear_screen()
+            W = 50
+            print("=" * W)
+            print("SMART INVENTORY MANAGEMENT".center(W))
+            print("=" * W)
+            print("VIEW PRODUCTS".center(W))
+            print("-" * W)
+
             start = (page - 1) * page_size
             chunk = products[start:start + page_size]
 
@@ -150,24 +196,37 @@ class InventoryUI:
             print("-" * 55)
             print(f"Page {page} of {total_pages}")
 
-            choice = input("Choice: ").strip().upper()
+            while True:
+                choice = input("Choice: ").strip().upper()
 
-            if choice == "N":
-                if page < total_pages:
-                    page += 1
+                if choice == "N":
+                    if page < total_pages:
+                        page += 1
+                        break
+                    else:
+                        input("Already on last page ... Press Enter to continue.")
+                        break
+                elif choice == "P":
+                    if page > 1:
+                        page -= 1
+                        break
+                    else:
+                        input("Already on first page... Press Enter to continue.")
+                        break
+                elif choice == "0":
+                    return
                 else:
-                    print("Already on last page.")
-            elif choice == "P":
-                if page > 1:
-                    page -= 1
-                else:
-                    print("Already on first page.")
-            elif choice == "0":
-                break
-            else:
-                print("Invalid choice.")
+                    print("Invalid choice.")
+            
     
     def search_product(self,page_size=2):
+        W = 50
+        print("=" * W)
+        print("SMART INVENTORY MANAGEMENT".center(W))
+        print("=" * W)
+        print("SEARCH PRODUCT".center(W))
+        print("-" * W)
+        
         product_id = input("Enter the name or id for search: ")
         try:
             change = int(product_id)
@@ -188,9 +247,14 @@ class InventoryUI:
             print(f"{'ID':<4} {'Name':<13} {'SKU':<8} {'Price':>8} {'Stock':>8}")
             print("=" * 55)
 
-            for pid, name, price, quantity, sku in chunk:
-                sku = sku or "-"
-                print(f"{pid:<4} {name:<13} {sku:<8} {price:>8} {quantity:>8}")
+            if len(chunk) == 0:
+                print()
+                print("No Products Found".center(50))
+                print()
+            else:
+                for pid, name, price, quantity, sku in chunk:
+                    sku = sku or "-"
+                    print(f"{pid:<4} {name:<13} {sku:<8} {price:>8} {quantity:>8}")
 
             print("=" * 55)
             print("N = Next Page")
@@ -205,16 +269,67 @@ class InventoryUI:
                 if page < total_pages:
                     page += 1
                 else:
-                    print("Already on last page.")
+                    input("Already on last page ... Press Enter to continue.")
             elif choice == "P":
                 if page > 1:
                     page -= 1
                 else:
-                    print("Already on first page.")
+                    input("Already on first page... Press Enter to continue.")
             elif choice == "0":
                 break
             else:
                 print("Invalid choice.")
+    
+    def update_product(self):
+        W = 50
+        print("=" * W)
+        print("SMART INVENTORY MANAGEMENT".center(W))
+        print("=" * W)
+        print("UPDATE PRODUCT".center(W))
+        print("-" * W)
+    
+        product_id = _get_int("Enter the product id to update: ")
+
+        a = self.inventory.view_products(product_id)
+
+        if a is None or len(a) == 0:
+            print(f"No product found with ID {product_id}.")
+            input("\nPress any key to continue...")
+            return
+        
+        print("1. Name")
+        print("2. Price")
+        print("3. Quantity")
+        print("4. Sku")
+        choice = _get_int("Enter the field to update: ")
+
+        field = self.inventory.select_option(choice)
+        value = input(f"Enter the new value for {field}: ")
+
+        self.inventory.update_product(product_id, field, value)
+        print(f"Product {field} updated successfully.")
+
+        input("\nPress any key to continue...")
+    
+    def delete_product(self):
+        W = 50
+        print("=" * W)
+        print("SMART INVENTORY MANAGEMENT".center(W))
+        print("=" * W)
+        print("DELETE PRODUCT".center(W))
+        print("-" * W)
+        product_id = _get_int("Enter the product id to delete: ")
+
+        is_exist = self.inventory.search_product(product_id)
+        if not is_exist:
+            print(f"No product found with ID {product_id}.")
+            input("\nPress any key to continue...")
+            return
+        
+        self.inventory.delete_product(product_id)
+        print(f"Product with ID {product_id} deleted successfully.")
+
+        input("\nPress any key to continue...")
 
             
 if __name__ == "__main__":

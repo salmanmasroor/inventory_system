@@ -14,8 +14,9 @@ except ImportError:
 
 class AuthenticationUI:
 
-    def __init__(self):
+    def __init__(self, app=None):
         self.auth = Authentication()
+        self.app = app
         self.registration_title = "REGISTRATION"
         self.login_title = "LOGIN"
 
@@ -24,66 +25,80 @@ class AuthenticationUI:
         print(self.registration_title.center(50))
         print("-" * 55)
 
-        first_name = input("1. First Name : ")
-        last_name = input("2. Last Name  : ")
-        email = input("3. Email      : ")
-        password = getpass.getpass("4. Password   : ")
 
-        print()
-        print("[1]. Register")
-        print("[0]. Back")
+        while True:
+            first_name = input("1. First Name : ")
+            last_name = input("2. Last Name  : ")
+            email = input("3. Email      : ")
+            password = getpass.getpass("4. Password   : ")
 
-        choose = input("Choose: ")
+            print()
+            print("[1]. Register")
+            print("[0]. Back")
 
-        if choose == "1":
-            while True:
-                if len(first_name) == 0:
-                    print("First Name can not be Empty ")
-                    first_name = input("First Name : ")
-                    continue
+            choose = input("Choose: ")
 
-                if not first_name.isalpha():
-                    print("Only Alphabets Allowed")
-                    first_name = input("First Name : ")
-                    continue
+            if choose == "1":
+                while True:
+                    if len(first_name) == 0:
+                        print("First Name can not be Empty ")
+                        first_name = input("First Name : ")
+                        continue
 
-                if len(last_name) > 0 and not last_name.isalpha():
-                    print("Only Alphabets Allowed")
-                    last_name = input("Last Name  : ")
-                    continue
+                    if not first_name.isalpha():
+                        print("Only Alphabets Allowed")
+                        first_name = input("First Name : ")
+                        continue
 
-                if "@" not in email:
-                    print("Enter the Correct Email")
-                    email = input("Email      : ")
-                    continue
+                    if len(last_name) > 0 and not last_name.isalpha():
+                        print("Only Alphabets Allowed")
+                        last_name = input("Last Name  : ")
+                        continue
 
-                if self.auth.email_exists(email):
-                    print("Email Already Exist")
-                    email = input("Email      : ")
-                    continue
+                    if "@" not in email:
+                        print("Enter the Correct Email")
+                        email = input("Email      : ")
+                        continue
 
-                if len(password) < 8:
-                    print("Password must have atleast 8 characters")
-                    password = getpass.getpass("4. Password   : ")
-                    continue
+                    if self.auth.email_exists(email):
+                        print("Email Already Exist")
+                        email = input("Email      : ")
+                        continue
 
-                break
+                    if len(password) < 8:
+                        print("Password must have atleast 8 characters")
+                        password = getpass.getpass("4. Password   : ")
+                        continue
 
-            user = User(first_name, last_name, email, password)
-            result = self.auth.register(user)
+                    break
             
-            if result:
-                print("\nRegistered Successfully!")
-                input("\nEnter any button to continue ......")
+                user = User(first_name, last_name, email, password)
+                result = self.auth.register(user)
+                
+                if result:
+                    print("\nRegistered Successfully!")
+                    input("\nEnter any button to continue ......")
+                    break
+            elif choose == "0":
+                if self.app is not None:
+                    self.app.clear_screen()
+                return
+
+    def login_design(self):
+        W = 50
+
+        print("=" * W)
+        print("SMART INVENTORY MANAGEMENT".center(W))
+        print("-" * W)
+        print(self.login_title.center(W))
+        print("=" * W)            
 
 
-    def login_menu(self):
-        print("=" * 55)
-        print(self.login_title.center(50))
-        print("=" * 55)
-        
+    def login_menu(self): 
         user = None
         while True:
+            self.app.clear_screen()
+            self.login_design()
             email = input("1. Email    : ")
             password = getpass.getpass("2. Password : ")
 
@@ -103,14 +118,19 @@ class AuthenticationUI:
                             return user
                         else:
                             print("\nInvalid Password!")
-                            response = input("\nPress Enter to try again (else press (n/N) to stop proceess)...")
-                            if response == 'n' or response == 'N':
-                                break
+                            input("\nPress Enter to try again (else press (n/N) to stop proceess)...")
+                            
                     else:
                         print("Email Does not Exist")
-                        response = input("\nPress Enter to try again (else press (n/N) to stop proceess)...")
-                        if response == 'n' or response == 'N':
-                            break
+                        input("\nPress Enter to try again (else press (n/N) to stop proceess)...")
+                        
+            elif choose == "0":
+                if self.app is not None:
+                    self.app.clear_screen()
+                return None
+            else:
+                print("Invalid Option")
+                input("\nPress Enter to try again the proceess)...")
 
 if __name__ == "__main__":
     ui = AuthenticationUI()

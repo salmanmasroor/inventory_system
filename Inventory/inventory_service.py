@@ -34,8 +34,11 @@ class Inventory:
         self._query("INSERT INTO products (name,price, quantity,sku) VALUES (?, ?, ?, ?)",(product.name,product.price,product.quantity,product.sku))
         log.info("Product added successfully")
     
-    def view_products(self):
-        return self._fetch("SELECT * FROM products")
+    def view_products(self,id=None):
+        if id is not None:
+            return self._fetch(f"SELECT * FROM products WHERE id = {id}")
+        else:
+            return self._fetch("SELECT * FROM products")
         
     def update_product(self,product_id,type,value):
         self._query(f"UPDATE products SET {type} = ? WHERE id = ?",(value,product_id))

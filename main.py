@@ -1,12 +1,12 @@
-from Inventory.inventory_service import Inventory
+from Inventory.inventory_ui import InventoryUI
 from schedular import run_task
 from Auth.authentication_ui import AuthenticationUI
 import os 
 class Application:
 
     def __init__(self):
-        self.inventory = Inventory()
-        self.auth = AuthenticationUI()
+        self.inventory = InventoryUI(self)
+        self.auth = AuthenticationUI(self)
         self.current_user = None
     
     def _welcome_menu(self):
@@ -33,7 +33,9 @@ class Application:
         os.system("cls" if os.name == "nt" else "clear")
     
     def run(self):
+        
         while self.current_user is None:
+            self.clear_screen()
             option = self._welcome_menu()
             
             if option == "1":
@@ -42,7 +44,8 @@ class Application:
                 self.current_user = result
 
                 while self.current_user:
-                    self.inventory.dashboard_menu()
+                    self.clear_screen()
+                    self.inventory.run()
             
             elif option == "2":
                 self.clear_screen()
