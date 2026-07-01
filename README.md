@@ -110,7 +110,7 @@ Before you begin, ensure the following are installed:
 | **Git** | Latest stable version |
 | **Terminal** | PowerShell (Windows), Bash (Linux/macOS) |
 | **IDE** *(optional)* | VS Code, Cursor, or PyCharm |
-| **DB Browser for SQLite** *(optional)* | For inspecting `inventory.db` visually |
+| **DBeaver** *(optional)* | For inspecting `inventory.db` visually |
 
 > **Tip:** Verify your Python installation:
 > ```bash
