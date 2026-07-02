@@ -80,7 +80,6 @@ class CategoryUI:
 
     def delete_category(self):
         self._design("DELETE CATEGORY")
-        self.view_categories()
         cat_id = input("Category ID to delete: ").strip()
         if not cat_id.isdigit():
             print("Invalid ID.")

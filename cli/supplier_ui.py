@@ -1,6 +1,5 @@
+import os
 from services.supplier_service import SupplierService
-
-
 class SupplierUI:
     def __init__(self, app=None):
         self.service = SupplierService()
@@ -27,18 +26,24 @@ class SupplierUI:
             choice = input("Choose: ").strip()
 
             if choice == "1":
+                self.clear_screen()
                 self.add_supplier()
             elif choice == "2":
+                self.clear_screen()
                 self.view_suppliers()
             elif choice == "3":
+                self.clear_screen()
                 self.update_supplier()
             elif choice == "4":
+                self.clear_screen()
                 self.delete_supplier()
             elif choice == "0":
                 break
             else:
                 print("Invalid choice.")
-
+    def clear_screen(self):
+        os.system("cls" if os.name == "nt" else "clear")
+    
     def add_supplier(self):
         name = input("Supplier name: ").strip()
         if not name:
