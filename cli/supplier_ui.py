@@ -1,11 +1,4 @@
-try:
-    from .supplier_service import SupplierService
-except ImportError:
-    import sys
-    from pathlib import Path
-
-    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-    from Inventory.supplier_service import SupplierService
+from services.supplier_service import SupplierService
 
 
 class SupplierUI:
@@ -105,8 +98,3 @@ class SupplierUI:
         else:
             print("Supplier not found.")
         input("\nPress Enter to continue...")
-
-
-if __name__ == "__main__":
-    ui = SupplierUI()
-    ui.display_menu()

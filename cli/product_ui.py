@@ -1,31 +1,17 @@
-try:
-    from utils import _get_int, _get_float
-    from models.product import Product
-    from .inventory_service import Inventory
-    from .category_ui import CategoryUI
-    from .category_service import CategoryService
-    from .supplier_ui import SupplierUI
-    from .supplier_service import SupplierService
-    import math
+import math
 
-except ImportError:
-    import sys
-    from pathlib import Path
+from cli.category_ui import CategoryUI
+from cli.supplier_ui import SupplierUI
+from core.utils import get_float, get_int
+from models.product import Product
+from services.category_service import CategoryService
+from services.product_service import ProductService
+from services.supplier_service import SupplierService
 
-    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-    from utils import _get_int, _get_float
-    from models.product import Product
-    from Inventory.inventory_service import Inventory
-    from Inventory.category_ui import CategoryUI
-    from Inventory.category_service import CategoryService
-    from Inventory.supplier_ui import SupplierUI
-    from Inventory.supplier_service import SupplierService
-    import math
 
-class InventoryUI:
-
+class ProductUI:
     def __init__(self, app=None):
-        self.inventory = Inventory()
+        self.product_service = ProductService()
         self.category_service = CategoryService()
         self.supplier_service = SupplierService()
         self.app = app
@@ -34,10 +20,16 @@ class InventoryUI:
         return {cat_id: name for cat_id, name in self.category_service.view_categories()}
 
     def _supplier_map(self):
-        return {supplier.id: supplier.name for supplier in self.supplier_service.list_suppliers()}
+        return {
+            supplier.id: supplier.name
+            for supplier in self.supplier_service.list_suppliers()
+        }
 
     def _parse_product_row(self, row):
-        pid, name, price, quantity = row[0], row[1], row[2], row[3]
+        pid = row[0]
+        name = row[1] or ""
+        price = row[2] if row[2] is not None else 0
+        quantity = row[3] if row[3] is not None else 0
         sku = row[4] if len(row) > 4 else None
         category_id = row[5] if len(row) > 5 else None
         supplier_id = row[6] if len(row) > 6 else None
@@ -53,28 +45,8 @@ class InventoryUI:
             return "-"
         return supplier_map.get(supplier_id, "-")
 
-    def dashboard_menu(self,username="Admin"):
-        """
-        print("=" * 45)
-        print("               DASHBOARD")
-        print("=" * 45)
-        print()
-
-        print(f"Logged in as : {username}")
-        print()
-
-        print(f"{'Products':<18}: 253")
-        print(f"{'Categories':<18}: 12")
-        print(f"{'Suppliers':<18}: 18")
-        print(f"{'Customers':<18}: 156")
-        print()
-
-        print(f"{'Stock Value':<18}: $85,200")
-        print(f"{'Low Stock':<18}: 9")
-        #print(f"{\n"Today's Sales\":<18}: $1,240")
-        print()
-        """
-        W = 50
+    def dashboard_menu(self, username="Admin"):
+        width = 50
 
         options = [
             "Products",
@@ -82,21 +54,21 @@ class InventoryUI:
             "Suppliers",
         ]
 
-        print("=" * W)
-        print("SMART INVENTORY MANAGEMENT".center(W))
-        print("=" * W)
-        print("MAIN MENU".center(W))
-        print("-" * W)
+        print("=" * width)
+        print("SMART INVENTORY MANAGEMENT".center(width))
+        print("=" * width)
+        print("MAIN MENU".center(width))
+        print("-" * width)
 
         for i, option in enumerate(options, 1):
             print(f"  {i}. {option}")
 
-        print("-" * W)
+        print("-" * width)
         print("  0. Exit")
-        print("=" * W)
-        
+        print("=" * width)
+
         return input("  Choose: ")
-    
+
     def run(self):
         result = self.dashboard_menu()
         if result == "1":
@@ -107,18 +79,14 @@ class InventoryUI:
             if self.app is not None:
                 self.app.clear_screen()
             CategoryUI(self.app).display_menu()
-
         elif result == "3":
             if self.app is not None:
                 self.app.clear_screen()
             SupplierUI(self.app).display_menu()
-
         elif result == "0":
             if self.app is not None:
                 self.app.clear_screen()
                 self.app.current_user = None
-    
-
 
     def product_menu(self):
         options = [
@@ -131,19 +99,19 @@ class InventoryUI:
 
         while True:
             self.app.clear_screen()
-            W = 50
-            print("=" * W)
-            print("SMART INVENTORY MANAGEMENT".center(W))
-            print("=" * W)
-            print("PRODUCTS".center(W))
-            print("-" * W)
+            width = 50
+            print("=" * width)
+            print("SMART INVENTORY MANAGEMENT".center(width))
+            print("=" * width)
+            print("PRODUCTS".center(width))
+            print("-" * width)
 
             for i, option in enumerate(options, 1):
                 print(f"  {i}. {option}")
 
-            print("-" * W)
+            print("-" * width)
             print("  0. Back")
-            print("=" * W)
+            print("=" * width)
 
             choice = input("  Choose: ").strip()
 
@@ -168,12 +136,12 @@ class InventoryUI:
                 print("\n  Invalid choice. Try again.\n")
 
     def add_product(self):
-        W = 50
-        print("=" * W)
-        print("SMART INVENTORY MANAGEMENT".center(W))
-        print("=" * W)
-        print("ADD PRODUCT".center(W))
-        print("-" * W)
+        width = 50
+        print("=" * width)
+        print("SMART INVENTORY MANAGEMENT".center(width))
+        print("=" * width)
+        print("ADD PRODUCT".center(width))
+        print("-" * width)
         category_list = self.category_service.view_categories()
         product_name = input("Product Name : ")
         sku = input("Sku : ")
@@ -183,7 +151,7 @@ class InventoryUI:
             print("Categories : \n")
             for i, category in enumerate(category_list, 1):
                 print(f"  {i}. {category[1]}")
-            category_choice = _get_int("Choose a category by number: ", min_value=1)
+            category_choice = get_int("Choose a category by number: ", min_value=1)
             if category_choice > len(category_list):
                 print("Invalid category choice.")
                 input("\nPress any key to continue...")
@@ -195,11 +163,12 @@ class InventoryUI:
         supplier_list = self.supplier_service.list_suppliers()
         supplier_id = None
         if supplier_list:
-            print("Suppliers : \n")
+            print("Suppliers : ")
             for i, supplier in enumerate(supplier_list, 1):
                 contact = supplier.contact or "-"
-                print(f"  {i}. {supplier.name} ({contact})")
-            supplier_choice = _get_int("Choose a supplier by number (0 to skip): ", min_value=0)
+                print(f"\t {i}. {supplier.name} ({contact})")
+
+            supplier_choice = get_int("\nChoose a supplier by number (0 to skip): ", min_value=0)
             if supplier_choice > len(supplier_list):
                 print("Invalid supplier choice.")
                 input("\nPress any key to continue...")
@@ -209,11 +178,10 @@ class InventoryUI:
         else:
             print("No suppliers available. You can add suppliers from the main menu.\n")
 
-        quantity = _get_int("Quantity : ")
-        price = _get_float("Price : ")
+        quantity = get_int("Quantity : ")
+        price = get_float("Price : ")
 
         while True:
-
             if not product_name.isalpha():
                 print("Only alphabet allowed and Can't be Empty")
                 product_name = input("Product Name : ")
@@ -225,16 +193,31 @@ class InventoryUI:
                 continue
 
             break
+        print()
+        print("[1]. Register")
+        print("[0]. Back")
 
-        product = Product(product_name, sku, quantity, price, category_id, supplier_id)
-        self.inventory.add_product(product)
+        while True:
+            choose = input("Choose: ")
+            
+            if choose == "1":
+                product = Product(product_name, sku, quantity, price, category_id, supplier_id)
+                self.product_service.add_product(product)
 
-        print("\nProduct added successfully!")
+                print("\nProduct added successfully!")
+                input("\nPress any key to continue...")
+                break
+            
+            elif choose == "0":
+                if self.app is not None:
+                    self.app.clear_screen()
+                return
+            else:
+                print("Invalid Option")
+                input("\nPress Enter to try again the proceess)...")
 
-        input("\nPress any key to continue...")
-
-    def view_product(self,page_size=4):
-        products = self.inventory.view_products()
+    def view_product(self, page_size=4):
+        products = self.product_service.view_products()
 
         if not products:
             print("No products found.")
@@ -244,15 +227,15 @@ class InventoryUI:
         supplier_map = self._supplier_map()
         page = 1
         total_pages = math.ceil(len(products) / page_size)
-    
+
         while True:
             self.app.clear_screen()
-            W = 50
-            print("=" * W)
-            print("SMART INVENTORY MANAGEMENT".center(W))
-            print("=" * W)
-            print("VIEW PRODUCTS".center(W))
-            print("-" * W)
+            width = 50
+            print("=" * width)
+            print("SMART INVENTORY MANAGEMENT".center(width))
+            print("=" * width)
+            print("VIEW PRODUCTS".center(width))
+            print("-" * width)
 
             start = (page - 1) * page_size
             chunk = products[start:start + page_size]
@@ -265,7 +248,9 @@ class InventoryUI:
             print("=" * 85)
 
             for row in chunk:
-                pid, sku, name, price, quantity, category_id, supplier_id = self._parse_product_row(row)
+                pid, sku, name, price, quantity, category_id, supplier_id = (
+                    self._parse_product_row(row)
+                )
                 sku = sku or "-"
                 category = self._category_label(category_id, category_map)
                 supplier = self._supplier_label(supplier_id, supplier_map)
@@ -288,44 +273,39 @@ class InventoryUI:
                     if page < total_pages:
                         page += 1
                         break
-                    else:
-                        input("Already on last page ... Press Enter to continue.")
-                        break
-                elif choice == "P":
+                    input("Already on last page ... Press Enter to continue.")
+                    break
+                if choice == "P":
                     if page > 1:
                         page -= 1
                         break
-                    else:
-                        input("Already on first page... Press Enter to continue.")
-                        break
-                elif choice == "0":
+                    input("Already on first page... Press Enter to continue.")
+                    break
+                if choice == "0":
                     return
-                else:
-                    print("Invalid choice.")
-            
-    
-    def search_product(self,page_size=2):
-        W = 50
-        print("=" * W)
-        print("SMART INVENTORY MANAGEMENT".center(W))
-        print("=" * W)
-        print("SEARCH PRODUCT".center(W))
-        print("-" * W)
-        
+                print("Invalid choice.")
+
+    def search_product(self, page_size=2):
+        width = 50
+        print("=" * width)
+        print("SMART INVENTORY MANAGEMENT".center(width))
+        print("=" * width)
+        print("SEARCH PRODUCT".center(width))
+        print("-" * width)
+
         product_id = input("Enter the name or id for search: ")
         try:
             change = int(product_id)
         except ValueError:
             change = product_id
 
-        print(change)
-        products = self.inventory.search_product(change)
+        products = self.product_service.search_product(change)
         category_map = self._category_map()
         supplier_map = self._supplier_map()
-        
+
         page = 1
         total_pages = max(1, math.ceil(len(products) / page_size)) if products else 1
-    
+
         while True:
             start = (page - 1) * page_size
             chunk = products[start:start + page_size]
@@ -339,11 +319,13 @@ class InventoryUI:
 
             if len(chunk) == 0:
                 print()
-                print("No Products Found".center(50))
+                print("No Products Found".center(80))
                 print()
             else:
                 for row in chunk:
-                    pid, sku, name, price, quantity, category_id, supplier_id = self._parse_product_row(row)
+                    pid, sku, name, price, quantity, category_id, supplier_id = (
+                        self._parse_product_row(row)
+                    )
                     sku = sku or "-"
                     category = self._category_label(category_id, category_map)
                     supplier = self._supplier_label(supplier_id, supplier_map)
@@ -375,59 +357,51 @@ class InventoryUI:
                 break
             else:
                 print("Invalid choice.")
-    
+
     def update_product(self):
-        W = 50
-        print("=" * W)
-        print("SMART INVENTORY MANAGEMENT".center(W))
-        print("=" * W)
-        print("UPDATE PRODUCT".center(W))
-        print("-" * W)
-    
-        product_id = _get_int("Enter the product id to update: ")
+        width = 50
+        print("=" * width)
+        print("SMART INVENTORY MANAGEMENT".center(width))
+        print("=" * width)
+        print("UPDATE PRODUCT".center(width))
+        print("-" * width)
 
-        a = self.inventory.view_products(product_id)
+        product_id = get_int("Enter the product id to update: ")
+        products = self.product_service.view_products(product_id)
 
-        if a is None or len(a) == 0:
+        if products is None or len(products) == 0:
             print(f"No product found with ID {product_id}.")
             input("\nPress any key to continue...")
             return
-        
+
         print("1. Name")
         print("2. Price")
         print("3. Quantity")
         print("4. Sku")
-        choice = _get_int("Enter the field to update: ")
+        choice = get_int("Enter the field to update: ")
 
-        field = self.inventory.select_option(choice)
+        field = self.product_service.select_option(choice)
         value = input(f"Enter the new value for {field}: ")
 
-        self.inventory.update_product(product_id, field, value)
+        self.product_service.update_product(product_id, field, value)
         print(f"Product {field} updated successfully.")
-
         input("\nPress any key to continue...")
-    
-    def delete_product(self):
-        W = 50
-        print("=" * W)
-        print("SMART INVENTORY MANAGEMENT".center(W))
-        print("=" * W)
-        print("DELETE PRODUCT".center(W))
-        print("-" * W)
-        product_id = _get_int("Enter the product id to delete: ")
 
-        is_exist = self.inventory.search_product(product_id)
+    def delete_product(self):
+        width = 50
+        print("=" * width)
+        print("SMART INVENTORY MANAGEMENT".center(width))
+        print("=" * width)
+        print("DELETE PRODUCT".center(width))
+        print("-" * width)
+        product_id = get_int("Enter the product id to delete: ")
+
+        is_exist = self.product_service.search_product(product_id)
         if not is_exist:
             print(f"No product found with ID {product_id}.")
             input("\nPress any key to continue...")
             return
-        
-        self.inventory.delete_product(product_id)
+
+        self.product_service.delete_product(product_id)
         print(f"Product with ID {product_id} deleted successfully.")
-
         input("\nPress any key to continue...")
-
-            
-if __name__ == "__main__":
-    ui = InventoryUI()
-    ui.run()

@@ -1,7 +1,7 @@
 import sqlite3
-from pathlib import Path
 
-DB_PATH = Path(__file__).resolve().parent / "inventory.db"
+from config import DB_PATH
+
 
 def connect():
     conn = sqlite3.connect(DB_PATH)
@@ -18,11 +18,12 @@ def create_table():
                 sku TEXT NOT NULL,
                 name TEXT NOT NULL,
                 price REAL NOT NULL,
-                quantity INTEGER NOT NULL   
-            )          
+                quantity INTEGER NOT NULL
+            )
                    """)
     conn.commit()
     conn.close()
+
 
 def user_table():
     conn = connect()
@@ -35,10 +36,11 @@ def user_table():
                 email UNIQUE NOT NULL,
                 password TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                   ) 
+                   )
                    """)
     conn.commit()
     conn.close()
+
 
 def add_column(table_name, column_name, attributes):
     conn = connect()
@@ -55,6 +57,7 @@ def add_column(table_name, column_name, attributes):
     finally:
         conn.close()
 
+
 def category_table():
     conn = connect()
     cursor = conn.cursor()
@@ -69,7 +72,9 @@ def category_table():
     cursor.execute("PRAGMA table_info(products)")
     columns = [row[1] for row in cursor.fetchall()]
     if "category_id" not in columns:
-        cursor.execute("ALTER TABLE products ADD COLUMN category_id INTEGER REFERENCES categories(id)")
+        cursor.execute(
+            "ALTER TABLE products ADD COLUMN category_id INTEGER REFERENCES categories(id)"
+        )
 
     conn.commit()
     conn.close()
@@ -89,12 +94,18 @@ def supplier_table():
     cursor.execute("PRAGMA table_info(products)")
     columns = [row[1] for row in cursor.fetchall()]
     if "supplier_id" not in columns:
-        cursor.execute("ALTER TABLE products ADD COLUMN supplier_id INTEGER REFERENCES suppliers(id)")
+        cursor.execute(
+            "ALTER TABLE products ADD COLUMN supplier_id INTEGER REFERENCES suppliers(id)"
+        )
     conn.commit()
     conn.close()
 
 
-create_table()
-user_table()
-category_table()
-supplier_table()
+def init_db():
+    create_table()
+    user_table()
+    category_table()
+    supplier_table()
+
+
+init_db()

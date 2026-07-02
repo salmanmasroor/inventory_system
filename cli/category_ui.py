@@ -1,18 +1,23 @@
-try:
-    from .category_service import CategoryService
-except ImportError:
-    import sys
-    from pathlib import Path
-
-    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-    from Inventory.category_service import CategoryService
+from services.category_service import CategoryService
+import os
 
 
 class CategoryUI:
     def __init__(self, app=None):
         self.service = CategoryService()
         self.app = app
+    
+    def _design(self, title):
+        width = 50
+        print("=" * width)
+        print("SMART INVENTORY MANAGEMENT".center(width))
+        print("-" * width)
+        print(title.center(width))
+        print("=" * width)
 
+    def clear_screen(self):
+        os.system("cls" if os.name == "nt" else "clear")
+    
     def display_menu(self):
         while True:
             if self.app is not None:
@@ -33,10 +38,13 @@ class CategoryUI:
             choice = input("Choose: ").strip()
 
             if choice == "1":
+                self.clear_screen()
                 self.add_category()
             elif choice == "2":
+                self.clear_screen()
                 self.view_categories()
             elif choice == "3":
+                self.clear_screen()
                 self.delete_category()
             elif choice == "0":
                 break
@@ -44,16 +52,20 @@ class CategoryUI:
                 print("Invalid choice.")
 
     def add_category(self):
+        self._design("ADD CATEGORY")
         name = input("Category name: ").strip()
         if not name:
             print("Name cannot be empty.")
             return
         if self.service.add_category(name):
             print(f"Category '{name}' added.")
+            input("\nPress Enter to continue...")
         else:
             print(f"Category '{name}' already exists.")
+            input("\nPress Enter to continue...")
 
     def view_categories(self):
+        self._design("VIEW CATEGORIES")
         categories = self.service.view_categories()
         if not categories:
             print("No categories found.")
@@ -67,6 +79,7 @@ class CategoryUI:
         input("Press Enter to continue...")
 
     def delete_category(self):
+        self._design("DELETE CATEGORY")
         self.view_categories()
         cat_id = input("Category ID to delete: ").strip()
         if not cat_id.isdigit():
@@ -76,8 +89,3 @@ class CategoryUI:
             print("Category deleted.")
         else:
             print("Category not found.")
-
-
-if __name__ == "__main__":
-    ui = CategoryUI()
-    ui.display_menu()

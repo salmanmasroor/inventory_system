@@ -1,4 +1,4 @@
-def _print_table(self,data):
+def print_table(data):
     print("ID  | Name         | Price    | Qty")
     print("-------------------------------------")
     for row in data:
@@ -10,33 +10,31 @@ def _print_table(self,data):
         )
 
 
-def _get_int(prompt, min_value=None):
+def get_int(prompt, min_value=None):
     while True:
         try:
             value = int(input(prompt))
-            if min_value is not None:
-                if value < min_value:
-                    print(f"Value must be at least {min_value}.")
-                    continue
+            if min_value is not None and value < min_value:
+                print(f"Value must be at least {min_value}.")
+                continue
             return value
         except ValueError:
             print("Enter a valid whole number.")
 
 
-def _get_float(prompt, min_value=0.01):
+def get_float(prompt, min_value=0.01):
     while True:
         try:
             value = float(input(prompt))
-            if min_value is not None:
-                if value < min_value:
-                    print(f"Value must be greater than {min_value}.")
-                    continue
+            if min_value is not None and value < min_value:
+                print(f"Value must be greater than {min_value}.")
+                continue
             return value
         except ValueError:
             print("Enter a valid number.")
 
 
-def _get_text(prompt, allow_spaces=True, max_length=100):
+def get_text(prompt, allow_spaces=True, max_length=100):
     while True:
         value = input(prompt).strip()
         if not value:

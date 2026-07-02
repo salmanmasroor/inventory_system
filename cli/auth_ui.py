@@ -1,32 +1,20 @@
 import getpass
 
-try:
-    from .authentication import Authentication
-    from models.user import User
-except ImportError:
-    import sys
-    from pathlib import Path
-
-    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-    from Auth.authentication import Authentication
-    from models.user import User
+from models.user import User
+from services.auth_service import AuthService
 
 
-class AuthenticationUI:
-
+class AuthUI:
     def __init__(self, app=None):
-        self.auth = Authentication()
+        self.auth = AuthService()
         self.app = app
         self.registration_title = "REGISTRATION"
         self.login_title = "LOGIN"
 
     def registration_menu(self):
-        print("=" * 55)
-        print(self.registration_title.center(50))
-        print("-" * 55)
-
-
         while True:
+            self.app.clear_screen()
+            self._design(self.registration_title)
             first_name = input("1. First Name : ")
             last_name = input("2. Last Name  : ")
             email = input("3. Email      : ")
@@ -71,10 +59,10 @@ class AuthenticationUI:
                         continue
 
                     break
-            
+
                 user = User(first_name, last_name, email, password)
                 result = self.auth.register(user)
-                
+
                 if result:
                     print("\nRegistered Successfully!")
                     input("\nEnter any button to continue ......")
@@ -83,56 +71,50 @@ class AuthenticationUI:
                 if self.app is not None:
                     self.app.clear_screen()
                 return
+            else:
+                print("Invalid Option")
+                input("\nPress Enter to try again the proceess)...")
 
-    def login_design(self):
-        W = 50
+    def _design(self,title):
+        width = 50
 
-        print("=" * W)
-        print("SMART INVENTORY MANAGEMENT".center(W))
-        print("-" * W)
-        print(self.login_title.center(W))
-        print("=" * W)            
+        print("=" * width)
+        print("SMART INVENTORY MANAGEMENT".center(width))
+        print("-" * width)
+        print(title.center(width))
+        print("=" * width)
 
-
-    def login_menu(self): 
-        user = None
+    def login_menu(self):
         while True:
             self.app.clear_screen()
-            self.login_design()
+            self._design(self.login_title)
             email = input("1. Email    : ")
             password = getpass.getpass("2. Password : ")
 
             print()
             print("[1]. Login")
             print("[0]. Back")
-            
+
             choose = input("Choose: ")
 
-            if choose == "1": 
-                    is_email_exist = self.auth.email_exists(email)
-                    if is_email_exist is True:
-                        user_login = self.auth.login(email,password)
-                        user = user_login
+            if choose == "1":
+                if self.auth.email_exists(email):
+                    user_login = self.auth.login(email, password)
 
-                        if user:
-                            return user
-                        else:
-                            print("\nInvalid Password!")
-                            input("\nPress Enter to try again (else press (n/N) to stop proceess)...")
-                            
-                    else:
-                        print("Email Does not Exist")
-                        input("\nPress Enter to try again (else press (n/N) to stop proceess)...")
-                        
+                    if user_login:
+                        return user_login
+
+                    print("\nInvalid Password!")
+                    input("\nPress Enter to try again .....")
+                else:
+                    print("Email Does not Exist")
+                    input("\nPress Enter to try again .....")
+
             elif choose == "0":
                 if self.app is not None:
                     self.app.clear_screen()
                 return None
+
             else:
                 print("Invalid Option")
                 input("\nPress Enter to try again the proceess)...")
-
-if __name__ == "__main__":
-    ui = AuthenticationUI()
-    a = ui.registration_menu()
-    print(a)
