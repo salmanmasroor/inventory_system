@@ -5,7 +5,6 @@ A command-line inventory application built with Python and SQLite. It supports u
 Uses only the Python standard library — no pip packages required.
 
 ---
-
 ## Features
 
 - **Authentication** — Register and login with email validation and SHA-256 password hashing
