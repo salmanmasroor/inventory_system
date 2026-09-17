@@ -117,6 +117,7 @@ inventory_system/
 
 - Python 3.9+
 - Git (optional)
+- 
 ---
 
 ## Installation & Run
